@@ -4,7 +4,7 @@ from PedersonCommitment import PedersonCommitment
 st.title("Pederson Commitment")
 
 
-message = st.number_input(label="Message", min_value=1, max_value=9999999999999, placeholder="only integer", value=0)
+message = st.number_input(label="Message", min_value=1, max_value=9999999999999, placeholder="only integer", value=1)
 secret = st.slider("Secret", 0, 100)
 insert = st.button("Insert")
 
