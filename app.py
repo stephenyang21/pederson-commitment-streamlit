@@ -1,35 +1,45 @@
 import streamlit as st
-from PedersonCommitment import PedersonCommitment
+from PedersonCommitment import generate_key,commitment,  check_point_on_curve
 
-st.title("Pederson Commitment")
+st.title("Pedersen Commitment")
+st.subheader('Input Variable')
+col1, col2 = st.columns([3,3])
+
+with col1:
+    m =  col1.text_input(" ", placeholder="Message (m) ")
+    insert = col1.button("Commit")
+
+with col2:
+    r = col2.text_input("",placeholder="Randomness (r) ")
+
+    col2.empty()
 
 
-message = st.number_input(label="Message", min_value=1, max_value=9999999999999, placeholder="only integer", value=1)
-secret = st.slider("Secret", 0, 100)
-insert = st.button("Insert")
+
+
 
 if insert:
-    pedersonCommitment  = PedersonCommitment(security=int(secret),message=int(message))
+    pedersonCommitment, x,y  = commitment(m,r)
     
-    #SetUp
-    pedersonCommitment.pedersen_setup()
-
-    #Commitment
-    c,r = pedersonCommitment.pederson_commitment()
+    check =check_point_on_curve(pedersonCommitment)
     
-    st.subheader("Commitment")
-    st.markdown(c)
-
+   
+    st.info(f"X : {x}  \n Y : {y}")
+    st.info(f"Commitment Point is on Curve : {(check)}")
     
-    open_message = pedersonCommitment.pedersen_opening(r)
-    st.subheader("Open commitment")
-    st.markdown(open_message)
 
-    st.info(f"p : {pedersonCommitment.p}  \n q : {pedersonCommitment.q}  \n g : {pedersonCommitment.g}  \n h : {pedersonCommitment.h} ")
  
 
+st.divider()
 
 
+col3, col4 = st.columns(2)
+with col3:
+    col3.subheader('Generate random Key')
 
+with col4:
+    generate= col4.button("Generate")
 
-
+if generate: 
+    public_key=generate_key()
+    st.info((bytes(public_key.to_string()).hex()))

@@ -1,38 +1,42 @@
-from Crypto.Util.number import getPrime, getRandomRange
-from Crypto import Random
+from ecdsa import SECP256k1, SigningKey
+import hashlib
 
-class PedersonCommitment:
-    def __init__(self,security, message):
-        self.security = security
-        self.message  = message
-        self.s =  None
 
-        self.p =  None
-        self.q = None
-        self.g = None
-        self.h =  None
-        return None
+def generate_key():
+    # Generate a private key
+    private_key = SigningKey.generate(curve=SECP256k1)
+    public_key = private_key.get_verifying_key()
+    return private_key, public_key
+
+
+def check_point_on_curve(point, curve=SECP256k1):
+    x = point.x()
+    y = point.y()
+    p = curve.curve.p()
     
+    # Check if the point satisfies y^2 = x^3 + 7 (mod p)
+    return (y * y) % p == (x * x * x + 7) % p
 
-    def pedersen_setup(self):
-        self.p = getPrime(2 * self.security, Random.new().read)
-        self.q = 2*self.p + 1# Choose a large prime number
-        self.g = getRandomRange(1, self.q-1)
-        self.s = getRandomRange(1, self.q-1)
-        self.h = pow(self.g,self.s,self.q)
-        return self.p, self.q, self.g, self.h
+
+def commitment(m_hex, r_hex, curve=SECP256k1):
+    # Ensure m and r are integers
+    m = int(m_hex, 16)
+    r = int(r_hex, 16)
+
+    G = curve.generator
+    order = G.order()
     
+    hash_of_zero = hashlib.sha256(b'0').digest()
+    scalar = int.from_bytes(hash_of_zero, byteorder="big") % order
+    H = scalar * G
 
-    def pederson_commitment(self):
-        r = getRandomRange(1, self.q-1)
-        c = (pow(self.g,self.message,self.q) * pow(self.h,r,self.q)) % self.q
 
-        return c,r
+    C = m * G + r * H
 
-    def pedersen_opening(self,*randomNumber):
-        sum = 0
-        for i in randomNumber:
-            sum += i
+    return C, C.x(), C.y()
 
-        res = (pow(self.g,self.message,self.q) * pow(self.h,sum,self.q)) % self.q
-        return res
+def generate_key():
+    # Generate a private key
+    private_key = SigningKey.generate(curve=SECP256k1)
+    public_key = private_key.get_verifying_key()
+    return  public_key
