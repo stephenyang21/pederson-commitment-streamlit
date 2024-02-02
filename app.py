@@ -6,11 +6,11 @@ st.subheader('Input Variable')
 col1, col2 = st.columns([3,3])
 
 with col1:
-    m =  col1.text_input(" ", placeholder="Message (m) ")
+    m =  col1.text_input("Message", placeholder="Message (m) ")
     insert = col1.button("Commit")
 
 with col2:
-    r = col2.text_input("",placeholder="Randomness (r) ")
+    r = col2.text_input("Randomness",placeholder="Randomness (r) ")
 
     col2.empty()
 
