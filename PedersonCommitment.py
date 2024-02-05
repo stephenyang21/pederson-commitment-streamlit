@@ -1,4 +1,5 @@
 from ecdsa import SECP256k1, SigningKey
+from Crypto.Hash import keccak
 import hashlib
 
 
@@ -26,17 +27,20 @@ def commitment(m_hex, r_hex, curve=SECP256k1):
     G = curve.generator
     order = G.order()
     
-    hash_of_zero = hashlib.sha256(b'0').digest()
+    hash_of_zero = solidity_sha3(0)
     scalar = int.from_bytes(hash_of_zero, byteorder="big") % order
+    print(scalar)
     H = scalar * G
+    print(f"G{G}")
 
 
     C = m * G + r * H
 
-    return C, C.x(), C.y()
+    return C, hex(C.x())[2:], hex(C.y())[2:]
 
-def generate_key():
-    # Generate a private key
-    private_key = SigningKey.generate(curve=SECP256k1)
-    public_key = private_key.get_verifying_key()
-    return  public_key
+
+
+def solidity_sha3(value):
+    k = keccak.new(digest_bits=256)
+    k.update(value.to_bytes(32, byteorder='big'))  # Assuming input is an integer
+    return k.digest()
